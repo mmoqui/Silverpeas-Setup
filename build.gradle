@@ -31,6 +31,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'maven-publish-auth'
 apply plugin: 'groovy'
+apply plugin: 'org.ajoberstar.grgit'
 
 /* cache management
 configurations {
@@ -83,11 +84,13 @@ publishing {
 buildscript {
   dependencies {
     classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+    classpath 'org.ajoberstar:grgit:2.1.0'
   }
   repositories {
     maven {
       url 'http://www.silverpeas.org/nexus/content/groups/silverpeas'
     }
+    jcenter()
     mavenLocal()
   }
 }
@@ -109,8 +112,20 @@ dependencies {
   testCompile 'junit:junit:4.12'
 }
 
+ext {
+  revision = grgit.head().abbreviatedId
+}
+
+jar {
+  manifest {
+    attributes(
+        "Build-Version": project.version,
+        "Git-Commit": grgit.head().abbreviatedId)
+  }
+}
+
 task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
+  from sourceSets.main.allSource
 }
 
 processTestResources.doLast {
